@@ -2,62 +2,48 @@
   <div class="app-container">
     <h1>🏁 БРУТАЛЬНЫЕ ГОНКИ 🏁</h1>
 
-    <LoginView v-if="currentView === 'login'" @login-success="goToLobby" />
-    <LobbyView
-        v-if="currentView === 'lobby'"
-        @room-joined="goToGame"
-        @logout="goToLogin"
-    />
-    <GameView v-if="currentView === 'game'" @leave="goToLobby" />
+    <LoginView v-if="view === 'login'" @login-success="view = 'lobby'" />
+
+    <LobbyView v-else-if="view === 'lobby'"
+               @room-joined="joinRoom" @logout="leaveAll" />
+
+    <WaitingRoom v-else-if="view === 'waiting'"
+                 :room-id="roomId"
+                 @leave="leaveAll"
+                 @start-race="startRace" />
+
+    <GameView v-else-if="view === 'game'" @leave="leaveAll" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import LoginView from './components/LoginView.vue'
 import LobbyView from './components/LobbyView.vue'
+import WaitingRoom from './components/WaitingRoom.vue'
 import GameView from './components/GameView.vue'
-import { useAuth } from './composables/useAuth'
+import { useWebSocket } from './composables/useWebSocket'
 
-const currentView = ref('login')
-const { isAuthenticated } = useAuth()
+const view = ref('login')
+const roomId = ref('')
+const { disconnect } = useWebSocket()
 
-onMounted(() => {
-  if (isAuthenticated()) {
-    currentView.value = 'lobby'
-  }
-})
+if (localStorage.getItem('token')) view.value = 'lobby'
 
-const goToLogin = () => {
-  currentView.value = 'login'
+const joinRoom = (id) => {
+  roomId.value = id
+  localStorage.setItem('currentRoomId', id)
+  view.value = 'waiting'
 }
 
-const goToLobby = () => {
-  currentView.value = 'lobby'
+const startRace = () => {
+  view.value = 'game'
 }
 
-const goToGame = (roomId) => {
-  currentView.value = 'game'
+const leaveAll = () => {
+  disconnect()
+  roomId.value = ''
+  localStorage.removeItem('currentRoomId')
+  view.value = 'lobby'
 }
 </script>
-
-<style>
-body {
-  background: #111;
-  color: #eee;
-  font-family: 'Courier New', monospace;
-  margin: 0;
-  display: flex;
-  justify-content: center;
-}
-.app-container {
-  text-align: center;
-  padding: 20px;
-  width: 100%;
-  max-width: 600px;
-}
-h1 {
-  color: #ff3333;
-  text-shadow: 0 0 10px #f00;
-}
-</style>

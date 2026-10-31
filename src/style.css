@@ -1,0 +1,59 @@
+* { box-sizing: border-box; }
+body { background: #111; color: #eee; font-family: 'Courier New', monospace; margin: 0; }
+.app-container { max-width: 760px; margin: 0 auto; padding: 20px; text-align: center; }
+h1 { color: #ff3333; text-shadow: 0 0 10px #f00; }
+.card { background: #222; padding: 24px; border: 2px solid #f33; border-radius: 8px; }
+input { width: 100%; padding: 10px; margin: 8px 0; background: #333; color: #fff; border: 1px solid #555; }
+button { padding: 10px 16px; margin: 4px; background: #f33; color: #fff; border: 0; cursor: pointer; font-weight: bold; }
+button:disabled { background: #444; cursor: not-allowed; }
+button.secondary, button.small { background: #444; }
+button.danger { background: #800; }
+.error { color: #f66; }
+.hint { color: #888; font-size: 12px; }
+.join-row { display: flex; gap: 8px; margin-top: 12px; }
+.room-id { background: #111; padding: 10px; margin-bottom: 12px; word-break: break-all; }
+.room-id strong { display: block; color: #0ff; font-size: 13px; }
+.connection { font-size: 12px; color: #0f0; }
+.connection.bad { color: #f33; }
+.players { list-style: none; padding: 0; text-align: left; }
+.players li { display: flex; justify-content: space-between; padding: 8px; background: #1a1a1a; margin: 4px 0; }
+.players li.empty { color: #555; justify-content: center; }
+.players .me { color: #0ff; }
+.ready { color: #0f0; }
+.not-ready { color: #f90; }
+.leaderboard { text-align: left; background: #181818; padding: 8px; margin-bottom: 8px; }
+.leaderboard h3 { margin: 0 0 6px; font-size: 13px; color: #888; }
+.leader-row { display: flex; justify-content: space-between; font-size: 13px; padding: 3px; }
+.leader-row.me { color: #0ff; font-weight: bold; }
+.leader-row.dead { opacity: .4; }
+.position-banner { padding: 6px; background: #222; margin-bottom: 8px; }
+.overtake { margin-left: 12px; color: #0f0; animation: pulse .5s infinite; }
+.hud { display: flex; justify-content: space-around; background: #222; padding: 10px; }
+.tachometer { position: relative; height: 26px; margin: 10px 0 4px; }
+.zone { position: absolute; top: 0; bottom: 0; }
+.blue { left: 0; width: 30%; background: #036; }
+.green { left: 30%; width: 40%; background: #063; }
+.red { left: 70%; width: 30%; background: #600; }
+.shift-mark { position: absolute; left: 70%; top: -6px; bottom: -6px; width: 3px; background: #fff; }
+.needle { position: absolute; top: -4px; bottom: -4px; width: 3px; background: #fff; transition: left .1s; }
+.shift-hint { height: 22px; font-size: 13px; color: #0f0; }
+.shift-hint.urgent { color: #f33; animation: pulse .3s infinite; }
+.warning { background: #900; padding: 8px; font-weight: bold; }
+.track { position: relative; height: 420px; background: #161616; border: 2px solid #333; overflow: hidden; margin-top: 10px; }
+.lane { position: absolute; top: 0; bottom: 0; width: 25%; border-left: 1px dashed #333; }
+.car, .other-car, .obstacle, .rocket { position: absolute; width: 20%; }
+.car { height: 42px; bottom: 50px; background: #f44; border-radius: 6px; box-shadow: 0 0 18px #f00; transition: left .15s; }
+.car.dead { background: #555; box-shadow: 0 0 30px #fa0; }
+.other-car { height: 30px; background: #4af; color: #000; font-size: 11px; border-radius: 4px; text-align: center; left: 40%; }
+.obstacle { height: 28px; }
+.obstacle.block { background: #777; border: 2px solid #aaa; }
+.obstacle.pothole { background: #000; border: 2px solid #333; border-radius: 50%; }
+.rocket { height: 18px; background: #fa0; box-shadow: 0 0 12px #f80; }
+.opponents { display: flex; gap: 14px; justify-content: center; font-size: 12px; margin: 8px 0; }
+.ahead { color: #0f0; }
+.behind { color: #f90; }
+.controls { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+.countdown-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 10; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+.countdown-overlay span { font-size: 140px; color: #f33; font-weight: bold; }
+.game-over { padding: 16px; background: #400; color: #f88; }
+@keyframes pulse { 50% { opacity: .4; } }
