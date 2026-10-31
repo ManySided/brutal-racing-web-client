@@ -1,63 +1,75 @@
-import { ref, onUnmounted } from 'vue'
-import { useAuth } from './useAuth'
+import { ref } from 'vue'
 
-const ws = ref(null)
-const isConnected = ref(false)
+const socket = ref(null)
+const currentRoomId = ref(null)
+export const isConnected = ref(false)
 
 export function useWebSocket() {
-    const { token } = useAuth()
+    const connect = (roomId) => {
+        console.log('useWebSocket.connect called with roomId:', roomId)
 
-    const connect = () => {
-        if (ws.value) return
+        if (socket.value?.readyState === WebSocket.OPEN && currentRoomId.value === roomId) {
+            console.log('Already connected to this room')
+            return
+        }
 
-        // Передаем токен через query parameter
-        const wsUrl = `ws://${window.location.host}/ws/game?token=${token.value}`
-        ws.value = new WebSocket(wsUrl)
+        disconnect()
+        currentRoomId.value = roomId
+        const jwt = localStorage.getItem('token')
+        const login = localStorage.getItem('login')
 
-        ws.value.onopen = () => {
-            console.log('WebSocket connected')
+        console.log('Connecting to WebSocket with token:', jwt ? 'present' : 'missing')
+
+        socket.value = new WebSocket(
+            `ws://${window.location.host}/ws/game?token=${encodeURIComponent(jwt)}&roomId=${roomId}&login=${encodeURIComponent(login)}`
+        )
+
+        socket.value.onopen = () => {
+            console.log('WebSocket connected successfully')
             isConnected.value = true
-            // Убираем отправку токена первым сообщением
+            window.dispatchEvent(new CustomEvent('ws-status', { detail: true }))
         }
 
-        ws.value.onmessage = (event) => {
-            const data = JSON.parse(event.data)
-            window.dispatchEvent(new CustomEvent('ws-message', { detail: data }))
+        socket.value.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data)
+                console.log('WebSocket received:', data.type, data)
+                window.dispatchEvent(new CustomEvent('ws-message', { detail: data }))
+            } catch (e) {
+                console.warn('Некорректный пакет от сервера', e)
+            }
         }
 
-        ws.value.onclose = () => {
+        socket.value.onclose = () => {
             console.log('WebSocket closed')
             isConnected.value = false
-            ws.value = null
+            window.dispatchEvent(new CustomEvent('ws-status', { detail: false }))
+            window.dispatchEvent(new CustomEvent('ws-closed'))
         }
 
-        ws.value.onerror = (error) => {
+        socket.value.onerror = (error) => {
             console.error('WebSocket error:', error)
         }
     }
 
-    const send = (data) => {
-        if (ws.value && ws.value.readyState === WebSocket.OPEN) {
-            ws.value.send(JSON.stringify(data))
+    const send = (payload) => {
+        if (socket.value?.readyState === WebSocket.OPEN) {
+            socket.value.send(JSON.stringify(payload))
+        } else {
+            console.warn('WebSocket not open, cannot send:', payload)
         }
     }
 
     const disconnect = () => {
-        if (ws.value) {
-            ws.value.close()
-            ws.value = null
+        if (socket.value) {
+            console.log('Disconnecting WebSocket')
+            socket.value.onclose = null
+            socket.value.close()
+            socket.value = null
         }
+        isConnected.value = false
+        currentRoomId.value = null
     }
 
-    onUnmounted(() => {
-        disconnect()
-    })
-
-    return {
-        ws,
-        isConnected,
-        connect,
-        send,
-        disconnect
-    }
+    return { connect, send, disconnect, isConnected }
 }
